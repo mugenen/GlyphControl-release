@@ -7,7 +7,7 @@ import os
 import torch
 import time
 from PIL import Image
-ALLOW_RUN_GENERATION = False
+
 def process_multi_wrapper(rendered_txt_0, rendered_txt_1, rendered_txt_2, rendered_txt_3,
                             shared_prompt,  
                             width_0, width_1, width_2, width_3,  
@@ -19,10 +19,9 @@ def process_multi_wrapper(rendered_txt_0, rendered_txt_1, rendered_txt_2, render
                             shared_num_samples, shared_image_resolution,  
                             shared_ddim_steps, shared_guess_mode,  
                             shared_strength, shared_scale, shared_seed,  
-                            shared_eta, shared_a_prompt, shared_n_prompt):  
-    global ALLOW_RUN_GENERATION
-    if not ALLOW_RUN_GENERATION:
-        return "Please get the glyph image first by clicking the 'Render Glyph Image' button", None
+                            shared_eta, shared_a_prompt, shared_n_prompt, allow_run_generation = True):  
+    if not allow_run_generation:
+        return "Please get the glyph image first by clicking the 'Render Glyph Image' button", None, allow_run_generation
 
     rendered_txt_values = [rendered_txt_0, rendered_txt_1, rendered_txt_2, rendered_txt_3]  
     width_values = [width_0, width_1, width_2, width_3]  
@@ -31,7 +30,7 @@ def process_multi_wrapper(rendered_txt_0, rendered_txt_1, rendered_txt_2, render
     top_left_y_values = [top_left_y_0, top_left_y_1, top_left_y_2, top_left_y_3]  
     yaw_values = [yaw_0, yaw_1, yaw_2, yaw_3]  
     num_rows_values = [num_rows_0, num_rows_1, num_rows_2, num_rows_3]  
-    ALLOW_RUN_GENERATION = False
+    allow_run_generation = False
     return "The image generation process finished!", render_tool.process_multi(rendered_txt_values, shared_prompt,  
                                      width_values, ratio_values,  
                                      top_left_x_values, top_left_y_values,  
@@ -40,7 +39,7 @@ def process_multi_wrapper(rendered_txt_0, rendered_txt_1, rendered_txt_2, render
                                      shared_ddim_steps, shared_guess_mode,  
                                      shared_strength, shared_scale, shared_seed,  
                                      shared_eta, shared_a_prompt, shared_n_prompt 
-                                    ) 
+                                    ), allow_run_generation
      
 def process_multi_wrapper_only_show_rendered(rendered_txt_0, rendered_txt_1, rendered_txt_2, rendered_txt_3,
                             shared_prompt,  
@@ -53,8 +52,7 @@ def process_multi_wrapper_only_show_rendered(rendered_txt_0, rendered_txt_1, ren
                             shared_num_samples, shared_image_resolution,  
                             shared_ddim_steps, shared_guess_mode,  
                             shared_strength, shared_scale, shared_seed,  
-                            shared_eta, shared_a_prompt, shared_n_prompt):  
-    global ALLOW_RUN_GENERATION   
+                            shared_eta, shared_a_prompt, shared_n_prompt):   
     rendered_txt_values = [rendered_txt_0, rendered_txt_1, rendered_txt_2, rendered_txt_3]  
     width_values = [width_0, width_1, width_2, width_3]  
     ratio_values = [ratio_0, ratio_1, ratio_2, ratio_3]  
@@ -62,7 +60,7 @@ def process_multi_wrapper_only_show_rendered(rendered_txt_0, rendered_txt_1, ren
     top_left_y_values = [top_left_y_0, top_left_y_1, top_left_y_2, top_left_y_3]  
     yaw_values = [yaw_0, yaw_1, yaw_2, yaw_3]  
     num_rows_values = [num_rows_0, num_rows_1, num_rows_2, num_rows_3]  
-    ALLOW_RUN_GENERATION = True
+    allow_run_generation = True
   
     return "The glyph image is generated!", render_tool.process_multi(rendered_txt_values, shared_prompt,  
                                      width_values, ratio_values,  
@@ -72,7 +70,7 @@ def process_multi_wrapper_only_show_rendered(rendered_txt_0, rendered_txt_1, ren
                                      shared_ddim_steps, shared_guess_mode,  
                                      shared_strength, shared_scale, shared_seed,  
                                      shared_eta, shared_a_prompt, shared_n_prompt, 
-                                     only_show_rendered_image=True)  
+                                     only_show_rendered_image=True), allow_run_generation  
 
 def load_ckpt(model_ckpt = "LAION-Glyph-10M-Epoch-5"):
     global render_tool, model
@@ -95,7 +93,7 @@ def load_ckpt(model_ckpt = "LAION-Glyph-10M-Epoch-5"):
     elif model_ckpt == "TextCaps-5K-Epoch-40":
         model = load_model_ckpt(model, "textcaps5K_epoch_40_model_wo_ema.ckpt")
 
-    render_tool = Render_Text(model)
+    render_tool = Render_Text(model, save_memory = SAVE_MEMORY)
     output_str = f"already change the model checkpoint to {model_ckpt}"
     print(output_str)
     if torch.cuda.is_available():
@@ -103,16 +101,17 @@ def load_ckpt(model_ckpt = "LAION-Glyph-10M-Epoch-5"):
             torch.cuda.empty_cache()
         time.sleep(2)
         print("empty the cuda cache")
-    return output_str, None
+    allow_run_generation = False
+    return output_str, None, allow_run_generation
 
-
+SAVE_MEMORY = False #True
 cfg = OmegaConf.load("config.yaml")
 model = load_model_from_config(cfg, "laion10M_epoch_6_model_wo_ema.ckpt", verbose=True)
 # model = load_model_from_config(cfg, "model_wo_ema.ckpt", verbose=True)
 # model = load_model_from_config(cfg, "model_states.pt", verbose=True)
 # model = load_model_from_config(cfg, "model.ckpt", verbose=True)
 # ddim_sampler = DDIMSampler(model)
-render_tool = Render_Text(model)
+render_tool = Render_Text(model, save_memory = SAVE_MEMORY)
 
 
 description = """
@@ -156,7 +155,10 @@ with block:
                 shared_prompt = gr.Textbox(label="Shared Prompt")
                 with gr.Row():
                     show_render_button = gr.Button(value="Render Glyph Image")
-                    run_button = gr.Button(value="Run Generation")     
+                    run_button = gr.Button(value="Run Generation")   
+                    allow_run_generation = gr.Checkbox(label='allow_run_generation',
+                                                 value=False, visible=False) 
+
                 with gr.Accordion("Model Options", open=False):
                     with gr.Row():
                         # model_ckpt = gr.inputs.Dropdown(["LAION-Glyph-10M", "Textcaps5K-10"], label="Checkpoint", default = "LAION-Glyph-10M")
@@ -166,7 +168,7 @@ with block:
             
             with gr.Accordion("Shared Advanced Options", open=False):  
                 with gr.Row():
-                    shared_num_samples = gr.Slider(label="Images", minimum=1, maximum=12, value=1, step=1)  
+                    shared_num_samples = gr.Slider(label="Images", minimum=1, maximum=12, value=3, step=1)  
                     shared_image_resolution = gr.Slider(label="Image Resolution", minimum=256, maximum=768, value=512, step=64, visible=False)  
                     shared_strength = gr.Slider(label="Control Strength", minimum=0.0, maximum=2.0, value=1.0, step=0.01, visible=False)  
                     shared_guess_mode = gr.Checkbox(label='Guess Mode', value=False, visible=False)  
@@ -176,7 +178,7 @@ with block:
                     shared_ddim_steps = gr.Slider(label="Steps", minimum=1, maximum=100, value=20, step=1)    
                     shared_eta = gr.Number(label="eta (DDIM)", value=0.0, visible=False)  
                 with gr.Row():
-                    shared_a_prompt = gr.Textbox(label="Added Prompt", value='best quality, extremely detailed')  
+                    shared_a_prompt = gr.Textbox(label="Added Prompt", value='4K, dslr, best quality, extremely detailed')  
                     shared_n_prompt = gr.Textbox(label="Negative Prompt",  
                                             value='longbody, lowres, bad anatomy, bad hands, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality') 
         
@@ -198,8 +200,8 @@ with block:
                         shared_num_samples, shared_image_resolution,  
                         shared_ddim_steps, shared_guess_mode,  
                         shared_strength, shared_scale, shared_seed,  
-                        shared_eta, shared_a_prompt, shared_n_prompt],  
-                outputs=[message, result_gallery])  
+                        shared_eta, shared_a_prompt, shared_n_prompt, allow_run_generation],  
+                outputs=[message, result_gallery, allow_run_generation])  
     
     show_render_button.click(fn=process_multi_wrapper_only_show_rendered,  
                 inputs=[rendered_txt_0, rendered_txt_1, rendered_txt_2, rendered_txt_3,
@@ -214,11 +216,11 @@ with block:
                         shared_ddim_steps, shared_guess_mode,  
                         shared_strength, shared_scale, shared_seed,  
                         shared_eta, shared_a_prompt, shared_n_prompt],  
-                outputs=[message, result_gallery]) 
+                outputs=[message, result_gallery, allow_run_generation]) 
     
     model_ckpt.change(load_ckpt,                 
                 inputs = [model_ckpt],
-                outputs = [message, result_gallery]
+                outputs = [message, result_gallery, allow_run_generation]
     )
 
     block.launch()
