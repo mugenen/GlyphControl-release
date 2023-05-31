@@ -34,8 +34,8 @@ def resize_and_pad_image(pil_image, image_size):
 
 def render_text_image_custom(image_size, bboxes, rendered_txt_values, num_rows_values, align = "center"):
     # aligns = ["center", "left", "right"]
-    """Render text image based on the list of bbox called  `bboxes`.
-        Support font that can be choosed.
+    """Render text image based on the glyph instructions, i.e., the list of tuples (text, bbox, num_rows).
+        Currently we just use Calibri font to render glyph images.
     """
     print(image_size, bboxes, rendered_txt_values, num_rows_values, align)
     background = Image.new("RGB", image_size, "white")

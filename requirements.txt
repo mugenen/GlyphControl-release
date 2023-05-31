@@ -8,4 +8,7 @@ pytorch-lightning==1.6.5
 transformers
 open_clip_torch
 ninja
+triton==2.0.0.dev20221120
+Levenshtein
+easyocr
 -f git+https://github.com/facebookresearch/xformers.git@main#egg=xformers

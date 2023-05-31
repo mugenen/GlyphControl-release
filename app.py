@@ -1,4 +1,10 @@
-from cldm.ddim_hacked import DDIMSampler
+# ------------------------------------------
+# GlyphControl: Glyph Conditional Control for Visual Text Generation
+# Paper Link: https://arxiv.org/pdf/2305.18259
+# Code Link: https://github.com/AIGText/GlyphControl-release
+# This script is used to build the demo.
+# ------------------------------------------
+
 import math
 from omegaconf import OmegaConf
 from scripts.rendertext_tool import Render_Text, load_model_from_config, load_model_ckpt
@@ -7,6 +13,8 @@ import os
 import torch
 import time
 from PIL import Image
+from cldm.hack import disable_verbosity, enable_sliced_attention
+# from pytorch_lightning import seed_everything
 
 def process_multi_wrapper(rendered_txt_0, rendered_txt_1, rendered_txt_2, rendered_txt_3,
                             shared_prompt,  
@@ -61,8 +69,8 @@ def process_multi_wrapper_only_show_rendered(rendered_txt_0, rendered_txt_1, ren
     yaw_values = [yaw_0, yaw_1, yaw_2, yaw_3]  
     num_rows_values = [num_rows_0, num_rows_1, num_rows_2, num_rows_3]  
     allow_run_generation = True
-  
-    return "The glyph image is generated!", render_tool.process_multi(rendered_txt_values, shared_prompt,  
+
+    glyph_image = render_tool.process_multi(rendered_txt_values, shared_prompt,  
                                      width_values, ratio_values,  
                                      top_left_x_values, top_left_y_values,  
                                      yaw_values, num_rows_values,  
@@ -70,7 +78,12 @@ def process_multi_wrapper_only_show_rendered(rendered_txt_0, rendered_txt_1, ren
                                      shared_ddim_steps, shared_guess_mode,  
                                      shared_strength, shared_scale, shared_seed,  
                                      shared_eta, shared_a_prompt, shared_n_prompt, 
-                                     only_show_rendered_image=True), allow_run_generation  
+                                     only_show_rendered_image=True)
+
+    if glyph_image[0] is None:
+        return "Warning: no glyph image would be rendered because the glyph insructions are not provided!", glyph_image, allow_run_generation
+    else:
+        return "The glyph image is successfully rendered!", glyph_image, allow_run_generation  
 
 def load_ckpt(model_ckpt = "LAION-Glyph-10M-Epoch-5"):
     global render_tool, model
@@ -79,19 +92,14 @@ def load_ckpt(model_ckpt = "LAION-Glyph-10M-Epoch-5"):
             torch.cuda.empty_cache()
         time.sleep(2)
         print("empty the cuda cache")
-
-    # if model_ckpt == "LAION-Glyph-1M":
-    #     model = load_model_ckpt(model, "laion1M_model_wo_ema.ckpt")
-    # if model_ckpt == "LAION-Glyph-10M-Epoch-5":
-    #     model = load_model_ckpt(model, "laion10M_epoch_5_model_wo_ema.ckpt")
     if model_ckpt == "LAION-Glyph-10M-Epoch-6":
-        model = load_model_ckpt(model, "laion10M_epoch_6_model_wo_ema.ckpt")
+        model = load_model_ckpt(model, "checkpoints/laion10M_epoch_6_model_wo_ema.ckpt")
     elif model_ckpt == "TextCaps-5K-Epoch-10":
-        model = load_model_ckpt(model, "textcaps5K_epoch_10_model_wo_ema.ckpt")
+        model = load_model_ckpt(model, "checkpoints/textcaps5K_epoch_10_model_wo_ema.ckpt")
     elif model_ckpt == "TextCaps-5K-Epoch-20":
-        model = load_model_ckpt(model, "textcaps5K_epoch_20_model_wo_ema.ckpt")
+        model = load_model_ckpt(model, "checkpoints/textcaps5K_epoch_20_model_wo_ema.ckpt")
     elif model_ckpt == "TextCaps-5K-Epoch-40":
-        model = load_model_ckpt(model, "textcaps5K_epoch_40_model_wo_ema.ckpt")
+        model = load_model_ckpt(model, "checkpoints/textcaps5K_epoch_40_model_wo_ema.ckpt")
 
     render_tool = Render_Text(model, save_memory = SAVE_MEMORY)
     output_str = f"already change the model checkpoint to {model_ckpt}"
@@ -104,13 +112,12 @@ def load_ckpt(model_ckpt = "LAION-Glyph-10M-Epoch-5"):
     allow_run_generation = False
     return output_str, None, allow_run_generation
 
-SAVE_MEMORY = False #True
-cfg = OmegaConf.load("config.yaml")
-model = load_model_from_config(cfg, "laion10M_epoch_6_model_wo_ema.ckpt", verbose=True)
-# model = load_model_from_config(cfg, "model_wo_ema.ckpt", verbose=True)
-# model = load_model_from_config(cfg, "model_states.pt", verbose=True)
-# model = load_model_from_config(cfg, "model.ckpt", verbose=True)
-# ddim_sampler = DDIMSampler(model)
+SAVE_MEMORY = False
+disable_verbosity()
+if SAVE_MEMORY:
+    enable_sliced_attention()
+cfg = OmegaConf.load("configs/config.yaml")
+model = load_model_from_config(cfg, "checkpoints/laion10M_epoch_6_model_wo_ema.ckpt", verbose=True)
 render_tool = Render_Text(model, save_memory = SAVE_MEMORY)
 
 
