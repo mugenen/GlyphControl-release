@@ -39,7 +39,7 @@ def render_text_image_custom(image_size, bboxes, rendered_txt_values, num_rows_v
     """
     print(image_size, bboxes, rendered_txt_values, num_rows_values, align)
     background = Image.new("RGB", image_size, "white")
-    font = ImageFont.truetype("calibri.ttf", encoding='utf-8', size=512)
+    font = ImageFont.truetype("fonts/calibri.ttf", encoding='utf-8', size=512)
     
     for text, bbox, num_rows in zip(rendered_txt_values, bboxes, num_rows_values):
         
