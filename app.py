@@ -1,9 +1,13 @@
 from cldm.ddim_hacked import DDIMSampler
 import math
 from omegaconf import OmegaConf
-from scripts.rendertext_tool import Render_Text, load_model_from_config
+from scripts.rendertext_tool import Render_Text, load_model_from_config, load_model_ckpt
 import gradio as gr  
 import os
+import torch
+import time
+from PIL import Image
+ALLOW_RUN_GENERATION = False
 def process_multi_wrapper(rendered_txt_0, rendered_txt_1, rendered_txt_2, rendered_txt_3,
                             shared_prompt,  
                             width_0, width_1, width_2, width_3,  
@@ -16,7 +20,10 @@ def process_multi_wrapper(rendered_txt_0, rendered_txt_1, rendered_txt_2, render
                             shared_ddim_steps, shared_guess_mode,  
                             shared_strength, shared_scale, shared_seed,  
                             shared_eta, shared_a_prompt, shared_n_prompt):  
-    
+    global ALLOW_RUN_GENERATION
+    if not ALLOW_RUN_GENERATION:
+        return "Please get the glyph image first by clicking the 'Render Glyph Image' button", None
+
     rendered_txt_values = [rendered_txt_0, rendered_txt_1, rendered_txt_2, rendered_txt_3]  
     width_values = [width_0, width_1, width_2, width_3]  
     ratio_values = [ratio_0, ratio_1, ratio_2, ratio_3]  
@@ -24,8 +31,8 @@ def process_multi_wrapper(rendered_txt_0, rendered_txt_1, rendered_txt_2, render
     top_left_y_values = [top_left_y_0, top_left_y_1, top_left_y_2, top_left_y_3]  
     yaw_values = [yaw_0, yaw_1, yaw_2, yaw_3]  
     num_rows_values = [num_rows_0, num_rows_1, num_rows_2, num_rows_3]  
-  
-    return render_tool.process_multi(rendered_txt_values, shared_prompt,  
+    ALLOW_RUN_GENERATION = False
+    return "The image generation process finished!", render_tool.process_multi(rendered_txt_values, shared_prompt,  
                                      width_values, ratio_values,  
                                      top_left_x_values, top_left_y_values,  
                                      yaw_values, num_rows_values,  
@@ -47,7 +54,7 @@ def process_multi_wrapper_only_show_rendered(rendered_txt_0, rendered_txt_1, ren
                             shared_ddim_steps, shared_guess_mode,  
                             shared_strength, shared_scale, shared_seed,  
                             shared_eta, shared_a_prompt, shared_n_prompt):  
-    
+    global ALLOW_RUN_GENERATION   
     rendered_txt_values = [rendered_txt_0, rendered_txt_1, rendered_txt_2, rendered_txt_3]  
     width_values = [width_0, width_1, width_2, width_3]  
     ratio_values = [ratio_0, ratio_1, ratio_2, ratio_3]  
@@ -55,8 +62,9 @@ def process_multi_wrapper_only_show_rendered(rendered_txt_0, rendered_txt_1, ren
     top_left_y_values = [top_left_y_0, top_left_y_1, top_left_y_2, top_left_y_3]  
     yaw_values = [yaw_0, yaw_1, yaw_2, yaw_3]  
     num_rows_values = [num_rows_0, num_rows_1, num_rows_2, num_rows_3]  
+    ALLOW_RUN_GENERATION = True
   
-    return render_tool.process_multi(rendered_txt_values, shared_prompt,  
+    return "The glyph image is generated!", render_tool.process_multi(rendered_txt_values, shared_prompt,  
                                      width_values, ratio_values,  
                                      top_left_x_values, top_left_y_values,  
                                      yaw_values, num_rows_values,  
@@ -66,22 +74,46 @@ def process_multi_wrapper_only_show_rendered(rendered_txt_0, rendered_txt_1, ren
                                      shared_eta, shared_a_prompt, shared_n_prompt, 
                                      only_show_rendered_image=True)  
 
+def load_ckpt(model_ckpt = "LAION-Glyph-10M-Epoch-5"):
+    global render_tool, model
+    if torch.cuda.is_available():
+        for i in range(5):
+            torch.cuda.empty_cache()
+        time.sleep(2)
+        print("empty the cuda cache")
+
+    # if model_ckpt == "LAION-Glyph-1M":
+    #     model = load_model_ckpt(model, "laion1M_model_wo_ema.ckpt")
+    # if model_ckpt == "LAION-Glyph-10M-Epoch-5":
+    #     model = load_model_ckpt(model, "laion10M_epoch_5_model_wo_ema.ckpt")
+    if model_ckpt == "LAION-Glyph-10M-Epoch-6":
+        model = load_model_ckpt(model, "laion10M_epoch_6_model_wo_ema.ckpt")
+    elif model_ckpt == "TextCaps-5K-Epoch-10":
+        model = load_model_ckpt(model, "textcaps5K_epoch_10_model_wo_ema.ckpt")
+    elif model_ckpt == "TextCaps-5K-Epoch-20":
+        model = load_model_ckpt(model, "textcaps5K_epoch_20_model_wo_ema.ckpt")
+    elif model_ckpt == "TextCaps-5K-Epoch-40":
+        model = load_model_ckpt(model, "textcaps5K_epoch_40_model_wo_ema.ckpt")
+
+    render_tool = Render_Text(model)
+    output_str = f"already change the model checkpoint to {model_ckpt}"
+    print(output_str)
+    if torch.cuda.is_available():
+        for i in range(5):
+            torch.cuda.empty_cache()
+        time.sleep(2)
+        print("empty the cuda cache")
+    return output_str, None
+
 
 cfg = OmegaConf.load("config.yaml")
+model = load_model_from_config(cfg, "laion10M_epoch_6_model_wo_ema.ckpt", verbose=True)
 # model = load_model_from_config(cfg, "model_wo_ema.ckpt", verbose=True)
 # model = load_model_from_config(cfg, "model_states.pt", verbose=True)
-model = load_model_from_config(cfg, "model.ckpt", verbose=True)
-
-ddim_sampler = DDIMSampler(model)
+# model = load_model_from_config(cfg, "model.ckpt", verbose=True)
+# ddim_sampler = DDIMSampler(model)
 render_tool = Render_Text(model)
 
-
-# description = """
-# #  <center>Expedit-SAM (Expedite Segment Anything Model without any training)</center>
-# Github link: [Link](https://github.com/Expedit-LargeScale-Vision-Transformer/Expedit-SAM)
-# You can select the speed mode you want to use from the "Speed Mode" dropdown menu and click "Run" to segment the image you uploaded to the "Input Image" box.
-# Points per side is a hyper-parameter that controls the number of points used to generate the segmentation masks. The higher the number, the more accurate the segmentation masks will be, but the slower the inference speed will be. The default value is 12.
-# """
 
 description = """
 ## Control Stable Diffusion with Glyph Images
@@ -98,7 +130,9 @@ with block:
     with gr.Row():  
         gr.Markdown(description)  
         only_show_rendered_image = gr.Number(value=1, visible=False)
-        
+    default_width = [0.3, 0.3, 0.3, 0.3]
+    default_top_left_x = [0.35, 0.15, 0.15, 0.5]
+    default_top_left_y = [0.4, 0.15, 0.65, 0.65]
     with gr.Column():  
             
         with gr.Row(): 
@@ -107,11 +141,13 @@ with block:
                     exec(f"""rendered_txt_{i} = gr.Textbox(label=f"Render Text {i+1}")""")
                     
                     with gr.Accordion(f"Advanced options {i+1}", open=False):  
-                        exec(f"""width_{i} = gr.Slider(label="Bbox Width", minimum=0., maximum=1, value=0.3, step=0.01)  """)
+                        exec(f"""width_{i} = gr.Slider(label="Bbox Width", minimum=0., maximum=1, value={default_width[i]}, step=0.01)  """)
                         exec(f"""ratio_{i} = gr.Slider(label="Bbox_width_height_ratio", minimum=0., maximum=5, value=0., step=0.02, visible=False)  """)
-                        exec(f"""top_left_x_{i} = gr.Slider(label="Bbox Top Left x", minimum=0., maximum=1, value={0.35 - 0.25 * math.cos(math.pi * i)}, step=0.01)  """)
-                        exec(f"""top_left_y_{i} = gr.Slider(label="Bbox Top Left y", minimum=0., maximum=1, value={0.1 if i < 2 else 0.6}, step=0.01)  """)
-                        exec(f"""yaw_{i} = gr.Slider(label="Bbox Yaw", minimum=-180, maximum=180, value=0, step=5) """)
+                        # exec(f"""top_left_x_{i} = gr.Slider(label="Bbox Top Left x", minimum=0., maximum=1, value={0.35 - 0.25 * math.cos(math.pi * i)}, step=0.01)  """)
+                        # exec(f"""top_left_y_{i} = gr.Slider(label="Bbox Top Left y", minimum=0., maximum=1, value={0.1 if i < 2 else 0.6}, step=0.01)  """)
+                        exec(f"""top_left_x_{i} = gr.Slider(label="Bbox Top Left x", minimum=0., maximum=1, value={default_top_left_x[i]}, step=0.01)  """)
+                        exec(f"""top_left_y_{i} = gr.Slider(label="Bbox Top Left y", minimum=0., maximum=1, value={default_top_left_y[i]}, step=0.01)  """)
+                        exec(f"""yaw_{i} = gr.Slider(label="Bbox Yaw", minimum=-20, maximum=20, value=0, step=5) """)
                         # exec(f"""num_rows_{i} = gr.Slider(label="num_rows", minimum=1, maximum=4, value=1, step=1, visible=False)  """)
                         exec(f"""num_rows_{i} = gr.Slider(label="num_rows", minimum=1, maximum=4, value=1, step=1)  """)
         
@@ -119,10 +155,16 @@ with block:
             with gr.Column():
                 shared_prompt = gr.Textbox(label="Shared Prompt")
                 with gr.Row():
-                    run_button = gr.Button(value="Run")
-                    show_render_button = gr.Button(value="Only Rendered")
+                    show_render_button = gr.Button(value="Render Glyph Image")
+                    run_button = gr.Button(value="Run Generation")     
+                with gr.Accordion("Model Options", open=False):
+                    with gr.Row():
+                        # model_ckpt = gr.inputs.Dropdown(["LAION-Glyph-10M", "Textcaps5K-10"], label="Checkpoint", default = "LAION-Glyph-10M")
+                        # model_ckpt = gr.inputs.Dropdown(["LAION-Glyph-10M-Epoch-6", "LAION-Glyph-10M-Epoch-5", "LAION-Glyph-1M"], label="Checkpoint", default = "LAION-Glyph-10M-Epoch-6")
+                        model_ckpt = gr.inputs.Dropdown(["LAION-Glyph-10M-Epoch-6", "TextCaps-5K-Epoch-10", "TextCaps-5K-Epoch-20", "TextCaps-5K-Epoch-40"], label="Checkpoint", default = "LAION-Glyph-10M-Epoch-6")
+                        # load_button = gr.Button(value = "Load Checkpoint")
             
-            with gr.Accordion("Shared Advanced options", open=False):  
+            with gr.Accordion("Shared Advanced Options", open=False):  
                 with gr.Row():
                     shared_num_samples = gr.Slider(label="Images", minimum=1, maximum=12, value=1, step=1)  
                     shared_image_resolution = gr.Slider(label="Image Resolution", minimum=256, maximum=768, value=512, step=64, visible=False)  
@@ -138,8 +180,11 @@ with block:
                     shared_n_prompt = gr.Textbox(label="Negative Prompt",  
                                             value='longbody, lowres, bad anatomy, bad hands, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality') 
         
-        with gr.Row(): 
-            result_gallery = gr.Gallery(label='Output', show_label=False, elem_id="gallery").style(grid=2, height='auto')  
+        with gr.Accordion("Output", open=True):
+            with gr.Row(): 
+                message = gr.Text(interactive=False, label = "Message")
+            with gr.Row():
+                result_gallery = gr.Gallery(label='Images', show_label=False, elem_id="gallery").style(grid=2, height='auto')  
     
     run_button.click(fn=process_multi_wrapper,  
                 inputs=[rendered_txt_0, rendered_txt_1, rendered_txt_2, rendered_txt_3,
@@ -154,7 +199,7 @@ with block:
                         shared_ddim_steps, shared_guess_mode,  
                         shared_strength, shared_scale, shared_seed,  
                         shared_eta, shared_a_prompt, shared_n_prompt],  
-                outputs=[result_gallery])  
+                outputs=[message, result_gallery])  
     
     show_render_button.click(fn=process_multi_wrapper_only_show_rendered,  
                 inputs=[rendered_txt_0, rendered_txt_1, rendered_txt_2, rendered_txt_3,
@@ -169,8 +214,11 @@ with block:
                         shared_ddim_steps, shared_guess_mode,  
                         shared_strength, shared_scale, shared_seed,  
                         shared_eta, shared_a_prompt, shared_n_prompt],  
-                outputs=[result_gallery]) 
-
-
+                outputs=[message, result_gallery]) 
+    
+    model_ckpt.change(load_ckpt,                 
+                inputs = [model_ckpt],
+                outputs = [message, result_gallery]
+    )
 
     block.launch()

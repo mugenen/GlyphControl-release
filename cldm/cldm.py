@@ -317,12 +317,10 @@ class ControlLDM(LatentDiffusion):
 
     def __init__(self, 
                  control_stage_config, 
-                 control_key, only_mid_control, 
-                 sd_locked = True, concat_textemb = False,      
+                 control_key, only_mid_control,   
                  learnable_conscale = False, guess_mode=False,
-                 sep_lr = False, decoder_lr = 1.0**-4, 
-                 sep_cond_txt = False, exchange_cond_txt = False,
-                 trans_textemb=False, trans_textemb_config = None, 
+                 sd_locked = True, sep_lr = False, decoder_lr = 1.0**-4, 
+                 sep_cond_txt = True, exchange_cond_txt = False, concat_all_textemb = False,
                  *args, **kwargs
                  ): 
         use_ema = kwargs.pop("use_ema", False)
@@ -334,9 +332,12 @@ class ControlLDM(LatentDiffusion):
         ignore_keys = kwargs.pop("ignore_keys", [])
 
         super().__init__(*args, use_ema=False, **kwargs)
+
+        # Glyph ControlNet
         self.control_model = instantiate_from_config(control_stage_config)
         self.control_key = control_key
         self.only_mid_control = only_mid_control
+
         self.learnable_conscale = learnable_conscale
         conscale_init = [1.0] * 13 if not guess_mode else [(0.825 ** float(12 - i)) for i in range(13)]
         if learnable_conscale:
@@ -344,16 +345,19 @@ class ControlLDM(LatentDiffusion):
             self.control_scales = nn.Parameter(torch.Tensor(conscale_init), requires_grad=True)
         else: 
             self.control_scales = conscale_init #[1.0] * 13 
+        
+        self.optimizer = torch.optim.AdamW   
+        # whether to unlock (fine-tune) the decoder parts of SD U-Net  
         self.sd_locked = sd_locked
-        self.concat_textemb = concat_textemb
-
         self.sep_lr = sep_lr
         self.decoder_lr = decoder_lr
+        
+        # specify the input text embedding of two branches (SD branch and Glyph ControlNet branch)
         self.sep_cond_txt = sep_cond_txt
+        self.concat_all_textemb = concat_all_textemb
         self.exchange_cond_txt = exchange_cond_txt
-
-        self.optimizer = torch.optim.AdamW     
-    
+        
+        # ema 
         self.use_ema = use_ema
         if self.use_ema: 
             self.model_ema = LitEma(self.control_model, init_num_updates= 0)
@@ -364,6 +368,7 @@ class ControlLDM(LatentDiffusion):
                 self.model_diffout_ema = LitEma(self.model.diffusion_model.out, init_num_updates= 0)
                 print(f"Keeping diffout EMAs of {len(list(self.model_diffout_ema.buffers()))}.")
         
+        # initialize the model from the checkpoint
         if ckpt_path is not None:
             ema_num_updates = self.init_from_ckpt(ckpt_path, ignore_keys, only_model=only_model)
             self.restarted_from_ckpt = True
@@ -430,14 +435,8 @@ class ControlLDM(LatentDiffusion):
                 if k.startswith(ik):
                     print("Deleting key {} from state_dict.".format(k))
                     del sd[k]
-        # missing, unexpected = self.load_state_dict(sd, strict=False) if not only_model else self.model.load_state_dict(
-        #     sd, strict=False)
-        if not only_model:
-            missing, unexpected = self.load_state_dict(sd, strict=False)  
-        elif path.endswith(".bin"):
-            missing, unexpected = self.model.diffusion_model.load_state_dict(sd, strict=False)
-        elif path.endswith(".ckpt"):
-            missing, unexpected = self.model.load_state_dict(sd, strict=False)
+        missing, unexpected = self.load_state_dict(sd, strict=False) if not only_model else self.model.load_state_dict(
+            sd, strict=False)
 
         print(f"Restored from {path} with {len(missing)} missing and {len(unexpected)} unexpected keys")
         if len(missing) > 0:
@@ -467,23 +466,27 @@ class ControlLDM(LatentDiffusion):
         cond_txt_list = cond["c_crossattn"]
 
         assert len(cond_txt_list) > 0
-        if self.sep_cond_txt:
-            cond_txt = cond_txt_list[0]
-            cond_txt_2 = None if len(cond_txt_list) == 1 else cond_txt_list[1]
+        # cond_txt: input text embedding of the pretrained SD branch
+        # cond_txt_2: input text embedding of the Glyph ControlNet branch
+        cond_txt = cond_txt_list[0]
+        if len(cond_txt_list) == 1:
+            cond_txt_2 = None
         else:
-            if len(cond_txt_list) > 1:
-                cond_txt = cond_txt_list[0] # input text embedding of the pretrained SD 
-                if not self.concat_textemb:
-                    cond_txt_2 = torch.cat(cond_txt_list[1:], 1) # input text embedding of the ControlNet branch
+            if self.sep_cond_txt:
+                # use each embedding for each branch separately
+                cond_txt_2 = cond_txt_list[1]
+            else:
+                # concat the embedding for Glyph ControlNet branch
+                if not self.concat_all_textemb:
+                    cond_txt_2 = torch.cat(cond_txt_list[1:], 1) 
                 else:
                     cond_txt_2 = torch.cat(cond_txt_list, 1)
-                if self.exchange_cond_txt:
-                    txt_buffer = cond_txt
-                    cond_txt = cond_txt_2
-                    cond_txt_2 = txt_buffer                   
-            else:
-                cond_txt = torch.cat(cond_txt_list, 1)
-                cond_txt_2 = None
+
+        if self.exchange_cond_txt:
+            # exchange the input text embedding of two branches
+            txt_buffer = cond_txt
+            cond_txt = cond_txt_2
+            cond_txt_2 = txt_buffer                   
 
         if cond['c_concat'] is None:
             eps = diffusion_model(x=x_noisy, timesteps=t, context=cond_txt, control=None, only_mid_control=self.only_mid_control)

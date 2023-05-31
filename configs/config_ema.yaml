@@ -1,5 +1,5 @@
 model:
-  base_learning_rate: 1.0e-6 #1.0e-5 #1.0e-4
+  base_learning_rate: 1.0e-4
   target: cldm.cldm.ControlLDM
   params:
     linear_start: 0.00085
@@ -18,7 +18,7 @@ model:
     scale_factor: 0.18215
     only_mid_control: False
     sd_locked: True
-    use_ema: False 
+    use_ema: True
 
     control_stage_config:
       target: cldm.cldm.ControlNet
@@ -86,3 +86,4 @@ model:
         freeze: True
         layer: "penultimate"
         # device: "cpu" 
+
