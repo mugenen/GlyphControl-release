@@ -75,7 +75,7 @@ conda activate GlyphControl
 pip install -r requirements.txt
 ```
 
-Althoguh you could run our codes on CPU device,  we recommend you to use CUDA device for faster inference. The recommended CUDA setting is **CUDA 11.3**.
+Althoguh you could run our codes on CPU device,  we recommend you to use CUDA device for faster inference. The recommended CUDA version is **CUDA 11.3** and the minimum GPU memory consumption is 8~10G.
 
 
 ## :unlock: Available Checkpoints
@@ -115,7 +115,7 @@ And then execute the code like this:
 python inference.py --cfg configs/config.yaml --ckpt checkpoints/laion10M_epoch_6_model_wo_ema.ckpt --save_path generated_images --glyph_instructions glyph_instructions.yaml --prompt <Prompt> --num_samples 4
 ```
 
-If you do not want to generate visual text, you could remove the "--glyph_instructions" parameter in the command.
+If you do not want to generate visual text, you could remove the "--glyph_instructions" parameter in the command. You could also specify other parameters like ```a_prompt``` and ```n_prompt``` to monitor the generation process. Please see the codes for detailed descriptions.
 
 
 ## :open_hands: Demo (Recommend)
@@ -148,7 +148,7 @@ Thanks to the open-source diffusion codes or demos: [DALL-E 2](https://web.auglo
 ## :question: Q&A
 Q: What is the approximate success rate?
 
-A: About 10-20%. Since the current version is an alpha version, the success rate is relatively low.
+A: About 10-20%. Since the current version is an alpha version, the success rate is relatively low. 
 
 ## :e-mail: Contact
 
