@@ -39,7 +39,7 @@ templates. We generate **four** images for each word during the evaluation proce
 
 ## :floppy_disk: Quantitative Results
 
-Method | #Params |Training Dataset  | $\bf{Acc} (\%)\uparrow$ | $\bf{\hat{Acc}} (\%) \uparrow$ |$\bf{LD}\downarrow$ | CLIP Score $\uparrow$ 
+Method | #Params |Training Dataset  | $\bf{Acc}$ $(\%)$ $\uparrow$ | $\bf{\hat{Acc}}$ $(\%)$ $\uparrow$ |$\bf{LD}\downarrow$ | CLIP Score $\uparrow$ 
 :--------- | :--------- | :--------| :---------: | :---------: | :---------: | :---------: |
 Stable Diffusion v2.0 | 865M | LAION 1.2B  | $0/0$ | $3/2$ | $4.25/5.01$  | $31.6/33.8$ 
 DeepFloyd (IF-I-M) | 2.1B | LAION 1.2B  | $0.3/0.1$ | $18/11$ |  $2.44/3.86$ | $32.8/34.3$  
