@@ -11,4 +11,4 @@ ninja
 triton==2.0.0.dev20221120
 Levenshtein
 easyocr
--f git+https://github.com/facebookresearch/xformers.git@main#egg=xformers
+xformers==0.0.21.dev541
