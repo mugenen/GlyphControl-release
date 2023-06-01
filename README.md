@@ -33,11 +33,13 @@
 (The prompts are listed in the ```text_prompts``` folder)
 
 Following [Character-aware Paper](https://arxiv.org/abs/2212.10562), we collect a pool of single-word candidates from Wikipedia. These words are
-then categorized into **four** buckets based on their frequencies: ${Bucket}^{1k}_{top}$, ${Bucket}_{1k}^{10k}$, Bucket^100k^~10~, and Bucket<sub>100k</sub><sup style="margin-left:-23px">plus</sup>. Each bucket contains words with frequencies in the respective range. To form input
+then categorized into **four** buckets based on their frequencies: top 1K, 1k to 10k, 10k to 100k, and 100k plus. Each bucket contains words with frequencies in the respective range. To form input
 prompts, we randomly select **100** words from each bucket and insert them into the above
 templates. We generate **four** images for each word during the evaluation process.
 
 ## :floppy_disk: Quantitative Results
+
+We evaluate the OCR accuracy through three metrics, i.e., exact match accuracy $\bf{Acc}$, capitalization-insensitive exact match accuracy $\bf{\hat{Acc}}$, average Levenshtein distance $\bf{LD}$. Besids, we also assess the image-text alignment through **CLIP score**.
 
 Method | #Params |Training Dataset  | $\bf{Acc}$ (%) $\uparrow$ | $\bf{\hat{Acc}}$ (%) $\uparrow$ |$\bf{LD}\downarrow$ | CLIP Score $\uparrow$ 
 :--------- | :--------- | :--------| :---------: | :---------: | :---------: | :---------: |
@@ -49,6 +51,7 @@ GlyphControl | 1.3B | LAION-Glyph-100K  | $30/19$  |  $37/24$ | $1.77/2.58$ | $3
 GlyphControl | 1.3B |  LAION-Glyph-1M  | $40/26$ |  $45/30$ | $1.59/2.47$ | $33.4/36.0$ 
 GlyphControl| 1.3B | LAION-Glyph-10M  | $\bf{42}/\bf{28}$ |  $\bf{48}/\bf{34}$ | $\bf{1.43}/\bf{2.40}$ | $\bf{33.9}/\bf{36.2}$
 
+The results shown here are averaged over four word-frequency buckets. The results on **SimpleBench** / **CreativeBench** are presented on the left/right side of the slash, respectively.
 
 
 ## :hammer_and_wrench: Installation
@@ -76,8 +79,11 @@ Althoguh you could run our codes on CPU device,  we recommend you to use CUDA de
 ## :floppy_disk: Available Checkpoints
 
 Download the checkpoints from our [hugging face space](https://huggingface.co/spaces/AIGText/GlyphControl/tree/main/checkpoints) and put the corresponding checkpoint files into the ```checkpoints``` folder. 
+We provide **four** types of checkpoints. 
 
-We provide **four** types of checkpoints. The relevant information is shown below.
+Apart from the model trained on **LAION-Glyph-10M** for 6 epochs,  we also fine-tune the model for additional 40 epochs on **TextCaps-5K**, a subset of [TextCaps v0.1 Dataset](https://textvqa.org/textcaps/dataset/) consisting of 5K images related to signs, books, and posters.During the fine-tuning, we also train the U-Net decoder of the original SD branch according to the ablation study in our [report](https://arxiv.org/pdf/2305.18259).
+
+The relevant information is shown below. 
 
 Checkpoint File | Training Dataset  | Trainig Epochs| $\bf{Acc}$ (%) $\uparrow$ | $\bf{\hat{Acc}}$ (%) $\uparrow$ |$\bf{LD}\downarrow$ | CLIP Score $\uparrow$ 
 :--------- | :--------- | :--------:| :---------: | :---------: | :---------: | :---------: |
@@ -108,6 +114,9 @@ python app.py
 Then you could generate visual text through a local demo interface. 
 
 Or you can directly try our **demo** in our **hugging face** space [GlyphControl](https://huggingface.co/spaces/AIGText/GlyphControl).
+
+
+<img src="readme_files/interface.png" width="90%">
 
 ## :love_letter: Acknowledgement
 

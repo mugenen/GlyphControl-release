@@ -1,9 +1,3 @@
-from cldm.ddim_hacked import DDIMSampler
-import math
-from omegaconf import OmegaConf
-from scripts.rendertext_tool import Render_Text, load_model_from_config, load_model_ckpt
-import gradio as gr  
-import os
 # ------------------------------------------
 # GlyphControl: Glyph Conditional Control for Visual Text Generation
 # Paper Link: https://arxiv.org/pdf/2305.18259
@@ -18,7 +12,8 @@ from PIL import Image
 from cldm.hack import disable_verbosity, enable_sliced_attention
 from scripts.rendertext_tool import Render_Text, load_model_from_config
 from omegaconf import OmegaConf
-
+import argparse
+import os
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -56,7 +51,7 @@ def parse_args():
         "--prompt",
         type=str,
         nargs="?",
-        default="a sign that says 'APPLE'",
+        default="A sign that says 'APPLE'",
         help="the prompt"
     )
     parser.add_argument(
@@ -126,13 +121,11 @@ if __name__ == "__main__":
     disable_verbosity()
     if args.save_memory:
         enable_sliced_attention()
-    cfg = OmegaConf.load(args.cfg)
-    model = load_model_from_config(cfg, args.ckpt, verbose=True)
-    render_tool = Render_Text(model, save_memory = args.save_memory)
-    
+
     try:
         # Glyph Instructions
         glyph_instructions = OmegaConf.load(args.glyph_instructions).Instructions
+        # print(glyph_instructions)
         rendered_txt_values = glyph_instructions.rendered_txt_values
         width_values = glyph_instructions.width_values
         ratio_values = glyph_instructions.ratio_values
@@ -140,13 +133,19 @@ if __name__ == "__main__":
         top_left_y_values = glyph_instructions.top_left_y_values
         yaw_values = glyph_instructions.yaw_values
         num_rows_values = glyph_instructions.num_rows_values
+        # print(rendered_txt_values, width_values, ratio_values, top_left_x_values, top_left_y_values, yaw_values, num_rows_values)
     except Exception as e:
         print(e)
         rendered_txt_values = [""]
         width_values, ratio_values, top_left_x_values, top_left_y_values, yaw_values, num_rows_values = [None] * 6 
-    
+
+    cfg = OmegaConf.load(args.cfg)
+    model = load_model_from_config(cfg, args.ckpt, verbose=True)
+    render_tool = Render_Text(model, save_memory = args.save_memory)
+
     # Render glyph images and generate corresponding visual text 
-    results = Render_Text.process_multi(rendered_txt_values, args.prompt,  
+    # print(args.prompt)
+    results = render_tool.process_multi(rendered_txt_values, args.prompt,  
                                      width_values, ratio_values,  
                                      top_left_x_values, top_left_y_values,  
                                      yaw_values, num_rows_values,  
