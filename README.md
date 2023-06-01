@@ -132,7 +132,7 @@ Or you can directly try our **demo** in our **hugging face** space [GlyphControl
 
 <img src="readme_files/interface-clean.png" width="90%">
 
-In the current version of our demo, we support four groups of ```Render Text``` at most.  Users should enter in the glyph instructions at corresponding parts.
+In the current version of our demo, we support four groups of ```Render Text``` at most.  Users should enter in the glyph instructions at corresponding parts. By selecting the checkpoint in the  ```Model Options``` part, users could try all four released checkpoints.
 
 ## :tada: Acknowledgement
 
