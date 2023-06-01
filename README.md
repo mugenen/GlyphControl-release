@@ -145,6 +145,7 @@ Thanks to the open-source diffusion codes or demos: [DALL-E 2](https://web.auglo
 
 ## :question: Q&A
 Q: What is the approximate success rate?
+
 A: About 10-20%. Since the current version is an alpha version, the success rate is relatively low.
 
 ## :e-mail: Contact
