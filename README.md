@@ -62,15 +62,17 @@ cd GlyphControl-release
 ```
 
 Install required Python packages
+
+(Recommended)
+```
+conda env create -f environment.yaml
+conda activate GlyphControl
+```
+or
 ```
 conda create -n GlyphControl python=3.9
 conda activate GlyphControl
 pip install -r requirements.txt
-
-Or
-
-conda env create -f environment_simple.yaml
-conda activate GlyphControl
 ```
 
 Althoguh you could run our codes on CPU device,  we recommend you to use CUDA device for faster inference. The recommended CUDA setting is **CUDA 11.3**.
