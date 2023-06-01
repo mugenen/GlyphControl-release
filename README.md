@@ -33,21 +33,21 @@
 (The prompts are listed in the ```text_prompts``` folder)
 
 Following [Character-aware Paper](https://arxiv.org/abs/2212.10562), we collect a pool of single-word candidates from Wikipedia. These words are
-then categorized into **four** buckets based on their frequencies: ${Bucket}^{1k}_{top}$, ${Bucket}^{10k}_{1k}$, $Bucket^{100k}_{10k}$, and ${Bucket}^{plus}_{100k}$. Each bucket contains words with frequencies in the respective range. To form input
+then categorized into **four** buckets based on their frequencies: ${Bucket}^{1k}_{top}$, ${Bucket}_{1k}^{10k}$, Bucket^100k^~10~, and Bucket<sub>100k</sub><sup style="margin-left:-23px">plus</sup>. Each bucket contains words with frequencies in the respective range. To form input
 prompts, we randomly select **100** words from each bucket and insert them into the above
 templates. We generate **four** images for each word during the evaluation process.
 
 ## :floppy_disk: Quantitative Results
 
-Method | #Params |Training Dataset  | $\mathbf{Acc}$(\%)$\uparrow$ | $\mathbf{\hat{Acc}}$(\%)$\uparrow$ |$\mathbf{LD}\downarrow$ | CLIP Score $\uparrow$ 
+Method | #Params |Training Dataset  | $\mathbf{Acc}(\%)\uparrow$ | $\mathbf{\hat{Acc}}(\%)\uparrow$ |$\mathbf{LD}\downarrow$ | CLIP Score $\uparrow$  
 :--------- | :--------- | :--------| :---------: | :---------: | :---------: | :---------: |
-Stable Diffusion v2.0 | 865M | LAION 1.2B  | $0$/$0$ | $3$/$2$ | $4.25$/$5.01$  | $31.6$/$33.8$ 
-DeepFloyd (IF-I-M) | 2.1B | LAION 1.2B  | $0.3$/$0.1$ | $18$/$11$ |  $2.44$/$3.86$ | $32.8$/$34.3$  
-DeepFloyd (IF-I-L)  | 2.6B | LAION 1.2B  | $0.3$/$0.7$ | $26$/$17$ |  $1.97$/$3.37$ | $33.1$/$34.9$ 
-DeepFloyd (IF-I-XL)  | 6.0B | LAION 1.2B  | $0.6$/$1$ | $33$/$21$  | $1.63$/$3.09$ | $33.5$/$35.2$
-GlyphControl | 1.3B | LAION-Glyph-100K  | $30$/$19$  |  $37$/$24$ | $1.77$/$2.58$ | $33.7$/$36.2$
-GlyphControl | 1.3B |  LAION-Glyph-1M  | $40$/$26$ |  $45$/$30$ | $1.59$/$2.47$ | $33.4$/$36.0$ 
-GlyphControl| 1.3B | LAION-Glyph-10M  | $\bf{42}$/$\bf{28}$ |  $\bf{48}$/$\bf{34}$ | $\bf{1.43}$/$\bf{2.40}$ | $\bf{33.9}$/$\bf{36.2}$
+Stable Diffusion v2.0 | 865M | LAION 1.2B  | $0/0$ | $3/2$ | $4.25/5.01$  | $31.6/33.8$ 
+DeepFloyd (IF-I-M) | 2.1B | LAION 1.2B  | $0.3/0.1$ | $18/11$ |  $2.44/3.86$ | $32.8/34.3$  
+DeepFloyd (IF-I-L)  | 2.6B | LAION 1.2B  | $0.3/0.7$ | $26/17$ |  $1.97/3.37$ | $33.1/34.9$ 
+DeepFloyd (IF-I-XL)  | 6.0B | LAION 1.2B  | $0.6/1$ | $33/21$  | $1.63/3.09$ | $33.5/35.2$
+GlyphControl | 1.3B | LAION-Glyph-100K  | $30/19$  |  $37/24$ | $1.77/2.58$ | $33.7/36.2$
+GlyphControl | 1.3B |  LAION-Glyph-1M  | $40/26$ |  $45/30$ | $1.59/2.47$ | $33.4/36.0$ 
+GlyphControl| 1.3B | LAION-Glyph-10M  | $\bf{42}/\bf{28}$ |  $\bf{48}/\bf{34}$ | $\bf{1.43}/\bf{2.40}$ | $\bf{33.9}/\bf{36.2}$
 
 
 
@@ -79,12 +79,12 @@ Download the checkpoints from our [hugging face space](https://huggingface.co/sp
 
 We provide **four** types of checkpoints. The relevant information is shown below.
 
-Checkpoint File | Training Dataset  | Trainig Epochs| $\mathbf{Acc}$(\%)$\uparrow$ | $\mathbf{\hat{Acc}}$(\%)$\uparrow$ |$\mathbf{LD}\downarrow$ | CLIP Score $\uparrow$ 
+Checkpoint File | Training Dataset  | Trainig Epochs| $\mathbf{Acc}(\%)\uparrow$ | $\mathbf{\hat{Acc}}(\%)\uparrow$ |$\mathbf{LD}\downarrow$ | CLIP Score $\uparrow$ 
 :--------- | :--------- | :--------:| :---------: | :---------: | :---------: | :---------: |
 laion10M_epoch_6_model_wo_ema.ckpt | LAION-Glyph-10M  | 6 | $\bf{42}$/$\bf{28}$ |  $\bf{48}$/$\bf{34}$ | $\bf{1.43}$/$\bf{2.40}$ | $\bf{33.9}$/$\bf{36.2}$ | 
-textcaps5K_epoch_10_model_wo_ema.ckpt | TextCaps 5K  | 10 | $58$/$30$  | $64$/$34$ | $1.01$/$2.40$ | $33.8$/$35.1$
-textcaps5K_epoch_20_model_wo_ema.ckpt | TextCaps 5K  | 20 | $57$/$32$  | $66$/$38$ | $0.97$/$2.26$ | $34.2$/$35.5$
-textcaps5K_epoch_40_model_wo_ema.ckpt | TextCaps 5K  | 40 | $\bf{71}$/$\bf{41}$ |  $\bf{77}$/$\bf{46}$ | $\bf{0.55}$/$\bf{1.67}$ | $\bf{34.2}$/$\bf{35.8}$ | 
+textcaps5K_epoch_10_model_wo_ema.ckpt | TextCaps 5K  | 10 | $58/30$  | $64/34$ | $1.01/2.40$ | $33.8/35.1$
+textcaps5K_epoch_20_model_wo_ema.ckpt | TextCaps 5K  | 20 | $57/32$  | $66/38$ | $0.97/2.26$ | $34.2/35.5$
+textcaps5K_epoch_40_model_wo_ema.ckpt | TextCaps 5K  | 40 | $\bf{71}/\bf{41}$ |  $\bf{77}/\bf{46}$ | $\bf{0.55}/\bf{1.67}$ | $\bf{34.2}/\bf{35.8}$ | 
 
 
 ## :firecracker: Inference
