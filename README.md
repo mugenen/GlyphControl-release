@@ -39,7 +39,7 @@ templates. We generate **four** images for each word during the evaluation proce
 
 ## :floppy_disk: Quantitative Results
 
-Method | #Params |Training Dataset  | $\bf{Acc}$ (%)$\uparrow$ | $\bf{\hat{Acc}}$ (%)$\uparrow$ |$\bf{LD}\downarrow$ | CLIP Score $\uparrow$ 
+Method | #Params |Training Dataset  | $\bf{Acc}$ (%) $\uparrow$ | $\bf{\hat{Acc}}$ (%) $\uparrow$ |$\bf{LD}\downarrow$ | CLIP Score $\uparrow$ 
 :--------- | :--------- | :--------| :---------: | :---------: | :---------: | :---------: |
 Stable Diffusion v2.0 | 865M | LAION 1.2B  | $0/0$ | $3/2$ | $4.25/5.01$  | $31.6/33.8$ 
 DeepFloyd (IF-I-M) | 2.1B | LAION 1.2B  | $0.3/0.1$ | $18/11$ |  $2.44/3.86$ | $32.8/34.3$  
@@ -79,7 +79,7 @@ Download the checkpoints from our [hugging face space](https://huggingface.co/sp
 
 We provide **four** types of checkpoints. The relevant information is shown below.
 
-Checkpoint File | Training Dataset  | Trainig Epochs| $\bf{Acc}$ (%)$\uparrow$ | $\bf{\hat{Acc}}$ (%)$\uparrow$ |$\bf{LD}\downarrow$ | CLIP Score $\uparrow$ 
+Checkpoint File | Training Dataset  | Trainig Epochs| $\bf{Acc}$ (%) $\uparrow$ | $\bf{\hat{Acc}}$ (%) $\uparrow$ |$\bf{LD}\downarrow$ | CLIP Score $\uparrow$ 
 :--------- | :--------- | :--------:| :---------: | :---------: | :---------: | :---------: |
 laion10M_epoch_6_model_wo_ema.ckpt | LAION-Glyph-10M  | 6 | $\bf{42}/\bf{28}$ |  $\bf{48}/\bf{34}$ | $\bf{1.43}/\bf{2.40}$ | $\bf{33.9}/\bf{36.2}$ | 
 textcaps5K_epoch_10_model_wo_ema.ckpt | TextCaps 5K  | 10 | $58/30$  | $64/34$ | $1.01/2.40$ | $33.8/35.1$
