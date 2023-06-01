@@ -73,7 +73,7 @@ conda env create -f environment_simple.yaml
 conda activate GlyphControl
 ```
 
-Althoguh you could run our codes on CPU device,  we recommend you to use CUDA device for faster inference. The recommended CUDA setting is **cuda11.3**.
+Althoguh you could run our codes on CPU device,  we recommend you to use CUDA device for faster inference. The recommended CUDA setting is **CUDA 11.3**.
 
 
 ## :floppy_disk: Available Checkpoints
@@ -91,6 +91,18 @@ laion10M_epoch_6_model_wo_ema.ckpt | LAION-Glyph-10M  | 6 | $\bf{42}/\bf{28}$ | 
 textcaps5K_epoch_10_model_wo_ema.ckpt | TextCaps 5K  | 10 | $58/30$  | $64/34$ | $1.01/2.40$ | $33.8/35.1$
 textcaps5K_epoch_20_model_wo_ema.ckpt | TextCaps 5K  | 20 | $57/32$  | $66/38$ | $0.97/2.26$ | $34.2/35.5$
 textcaps5K_epoch_40_model_wo_ema.ckpt | TextCaps 5K  | 40 | $\bf{71}/\bf{41}$ |  $\bf{77}/\bf{46}$ | $\bf{0.55}/\bf{1.67}$ | $\bf{34.2}/\bf{35.8}$ | 
+
+Although the models fine-tuned on TextCaps 5K demonstrate high OCR accuracy, the creativity and diversity of generted images may be lost. Feel free to try all the provided checkpoints for comparison. 
+
+## :floppy_disk: Glyph Instructions
+
+* **Text character information**: GlyphControl allows for the specification of not only single words but also phrases or sentences composed of multiple words. As long as the text is intended to **be placed within the same area**, users can customize the text accordingly.
+
+* **Text line information**: GlyphControl provides the flexibility to assign words to multiple lines by adjusting the **number of rows**. This feature enhances the visual effects and allows for more versatile text arrangements.
+
+* **Text box information**: Users have control over the font size of the rendered text by modifying the **width** property of the text bounding box. The location of the text on the image can be specified using the **coordinates** of the top left corner. Additionally, the **yaw rotation angle** of the text box allows for further adjustments. By default, the text is rendered following the optimal width-height ratio, but users can define a specific width-height ratio to precisely control the height of the text box (not recommended).
+
+Users should provide the above three types of glyph instructions for inference. 
 
 
 ## :firecracker: Inference
@@ -116,7 +128,9 @@ Then you could generate visual text through a local demo interface.
 Or you can directly try our **demo** in our **hugging face** space [GlyphControl](https://huggingface.co/spaces/AIGText/GlyphControl).
 
 
-<img src="readme_files/interface.png" width="90%">
+<img src="readme_files/interface-clean.png" width="90%">
+
+In the current version of our demo, we support four groups of ```Render Text``` at most.  Users should enter in the glyph instructions at corresponding parts.
 
 ## :love_letter: Acknowledgement
 
