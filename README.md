@@ -11,7 +11,7 @@
 </div>
 
 
-## :star2:	Highlights
+## :high_brightness: Highlights
 
 * We propose a glyph-conditional text-to-image generation model named **GlyphControl** for visual text generation, which outperforms DeepFloyd IF and Stable Diffusion in terms of OCR accuracy and CLIP score while saving the number of parameters by more than 3×.
 
@@ -25,7 +25,7 @@
 
 </div>
 
-## :floppy_disk: Test Benchmark
+## :triangular_flag_on_post: Test Benchmark
 
 * **SimpleBench**: A simple text prompt benchmark following the [Character-aware Paper](https://arxiv.org/abs/2212.10562). The format of prompts remains the same:  _`A sign that says "\<word>".'_
 * **CreativeBench**: A creative text prompt benchmark adapted from [GlyphDraw](https://arxiv.org/abs/2303.17870). We adopt diverse English-version prompts in the original benchmark and replace the words inside quotes. As an example, the prompt may look like: _`Little panda holding a sign that says "\<word>".'_ or _'A photographer wears a t-shirt with the word "\<word>." printed on it.'_
@@ -37,7 +37,7 @@ then categorized into **four** buckets based on their frequencies: top 1K, 1k to
 prompts, we randomly select **100** words from each bucket and insert them into the above
 templates. We generate **four** images for each word during the evaluation process.
 
-## :floppy_disk: Quantitative Results
+## :camera: Quantitative Results
 
 We evaluate the OCR accuracy through three metrics, i.e., exact match accuracy $\bf{Acc}$, capitalization-insensitive exact match accuracy $\bf{\hat{Acc}}$, average Levenshtein distance $\bf{LD}$. Besids, we also assess the image-text alignment through **CLIP score**.
 
@@ -54,7 +54,7 @@ GlyphControl| 1.3B | LAION-Glyph-10M  | $\bf{42}/\bf{28}$ |  $\bf{48}/\bf{34}$ |
 The results shown here are averaged over four word-frequency buckets. The results on **SimpleBench** / **CreativeBench** are presented on the left/right side of the slash, respectively.
 
 
-## :hammer_and_wrench: Installation
+## :wrench: Installation
 Clone this repo: 
 ```
 git clone https://github.com/AIGText/GlyphControl-release.git
@@ -76,7 +76,7 @@ conda activate GlyphControl
 Althoguh you could run our codes on CPU device,  we recommend you to use CUDA device for faster inference. The recommended CUDA setting is **CUDA 11.3**.
 
 
-## :floppy_disk: Available Checkpoints
+## :unlock: Available Checkpoints
 
 Download the checkpoints from our [hugging face space](https://huggingface.co/spaces/AIGText/GlyphControl/tree/main/checkpoints) and put the corresponding checkpoint files into the ```checkpoints``` folder. 
 We provide **four** types of checkpoints. 
@@ -94,7 +94,7 @@ textcaps5K_epoch_40_model_wo_ema.ckpt | TextCaps 5K  | 40 | $\bf{71}/\bf{41}$ | 
 
 Although the models fine-tuned on TextCaps 5K demonstrate high OCR accuracy, the creativity and diversity of generted images may be lost. Feel free to try all the provided checkpoints for comparison. 
 
-## :floppy_disk: Glyph Instructions
+## :mag_right: Glyph Instructions
 
 * **Text character information**: GlyphControl allows for the specification of not only single words but also phrases or sentences composed of multiple words. As long as the text is intended to **be placed within the same area**, users can customize the text accordingly.
 
@@ -105,7 +105,7 @@ Although the models fine-tuned on TextCaps 5K demonstrate high OCR accuracy, the
 Users should provide the above three types of glyph instructions for inference. 
 
 
-## :firecracker: Inference
+## :wrench: Inference
 To run inference code locally, you need specify the glyph instructions first in the file ```glyph_instructions.yaml```.
 
 And then execute the code like this:
@@ -116,7 +116,7 @@ python inference.py --cfg configs/config.yaml --ckpt checkpoints/laion10M_epoch_
 If you do not want to generate visual text, you could remove the "--glyph_instructions" parameter in the command.
 
 
-## :firecracker: Demo (Recommend)
+## :open_hands: Demo (Recommend)
 As an easier way to conduct trials on our models, you could test through a demo.
 
 After downloading the checkpoints, execute the code:
@@ -132,7 +132,7 @@ Or you can directly try our **demo** in our **hugging face** space [GlyphControl
 
 In the current version of our demo, we support four groups of ```Render Text``` at most.  Users should enter in the glyph instructions at corresponding parts.
 
-## :love_letter: Acknowledgement
+## :tada: Acknowledgement
 
 **Dataset**: 
 We sincerely thank the open-source large image-text dataset [LAION-2B-en](https://laion.ai/blog/laion-5b/) and corresponding aesthetic score prediction codes [LAION-Aesthetics_Predictor V2](https://github.com/christophschuhmann/improved-aesthetic-predictor). As for OCR detection, thanks for the open-source tool [PP-OCRv3](https://github.com/PaddlePaddle/PaddleOCR/blob/release/2.6/doc/doc_en/ppocr_introduction_en.md#pp-ocrv3).
@@ -143,17 +143,19 @@ Our method is based on the powerful controllable image generation method [Contro
 **Comparison Methods in the paper**: 
 Thanks to the open-source diffusion codes or demos: [DALL-E 2](https://web.augloop-tools.officeppe.com/playground/), [Stable Diffusion 2.0](https://github.com/Stability-AI/StableDiffusion), [Stable Diffusion XL](https://dreamstudio.ai/generate), [DeepFloyd](https://github.com/deep-floyd/IF).
 
+## :question: Q&A
+Q: What is the approximate success rate?
+A: About 10-20%. Since the current version is an alpha version, the success rate is relatively low.
 
-
-## :envelope: Contact
+## :e-mail: Contact
 
 For help or issues about the github codes or huggingface demo of GlyphControl, please email Yukang Yang (yyk19@tsinghua.org.cn), Dongnan Gui (gdn2001@mail.ustc.edu.cn), and Yuhui Yuan (yuhui.yuan@microsoft.com) or submit a GitHub issue.
 
 
-## :herb: Citation
+## :mailbox_with_mail: Citation
 If you find this code useful in your research, please consider citing:
 ```
-@misc{yang2023glyphcontrol,
+@article{yang2023glyphcontrol,
       title={GlyphControl: Glyph Conditional Control for Visual Text Generation}, 
       author={Yukang Yang and Dongnan Gui and Yuhui Yuan and Haisong Ding and Han Hu and Kai Chen},
       year={2023},
