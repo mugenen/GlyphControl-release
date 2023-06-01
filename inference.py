@@ -49,7 +49,7 @@ def parse_args():
     parser.add_argument(
         "--glyph_instructions",
         type=str,
-        default="glyph_instructions.yaml",
+        default=None, #"glyph_instructions.yaml",
         help="path to glyph instructions",
     )  
     parser.add_argument(
@@ -58,6 +58,12 @@ def parse_args():
         nargs="?",
         default="a sign that says 'APPLE'",
         help="the prompt"
+    )
+    parser.add_argument(
+        "--num_samples",
+        type=int,
+        default=4,
+        help="how many samples to produce for each given prompt. A.k.a batch size",
     )
     parser.add_argument(
         "--a_prompt",
@@ -70,13 +76,6 @@ def parse_args():
         type=str,
         default='longbody, lowres, bad anatomy, bad hands, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality',
         help="negative prompt"
-    )
-
-    parser.add_argument(
-        "--num_samples",
-        type=int,
-        default=4,
-        help="how many samples to produce for each given prompt. A.k.a batch size",
     )
     parser.add_argument(
         "--image_resolution",
@@ -130,16 +129,21 @@ if __name__ == "__main__":
     cfg = OmegaConf.load(args.cfg)
     model = load_model_from_config(cfg, args.ckpt, verbose=True)
     render_tool = Render_Text(model, save_memory = args.save_memory)
-
-    # Glyph Instructions
-    glyph_instructions = OmegaConf.load(args.glyph_instructions).Instructions
-    rendered_txt_values = glyph_instructions.rendered_txt_values
-    width_values = glyph_instructions.width_values
-    ratio_values = glyph_instructions.ratio_values
-    top_left_x_values = glyph_instructions.top_left_x_values
-    top_left_y_values = glyph_instructions.top_left_y_values
-    yaw_values = glyph_instructions.yaw_values
-    num_rows_values = glyph_instructions.num_rows_values
+    
+    try:
+        # Glyph Instructions
+        glyph_instructions = OmegaConf.load(args.glyph_instructions).Instructions
+        rendered_txt_values = glyph_instructions.rendered_txt_values
+        width_values = glyph_instructions.width_values
+        ratio_values = glyph_instructions.ratio_values
+        top_left_x_values = glyph_instructions.top_left_x_values
+        top_left_y_values = glyph_instructions.top_left_y_values
+        yaw_values = glyph_instructions.yaw_values
+        num_rows_values = glyph_instructions.num_rows_values
+    except Exception as e:
+        print(e)
+        rendered_txt_values = [""]
+        width_values, ratio_values, top_left_x_values, top_left_y_values, yaw_values, num_rows_values = [None] * 6 
     
     # Render glyph images and generate corresponding visual text 
     results = Render_Text.process_multi(rendered_txt_values, args.prompt,  

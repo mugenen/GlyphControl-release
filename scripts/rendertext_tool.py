@@ -14,6 +14,7 @@ from torchvision.transforms import ToTensor
 from contextlib import nullcontext
 
 def load_model_from_config(cfg, ckpt, verbose=False, not_use_ckpt=False):
+    # build the model based on cfg and load ckpt into the model
 
     # if "model_ema.input_blocks10in_layers0weight" not in sd:
     #     print("missing model_ema.input_blocks10in_layers0weight. set use_ema as False")
@@ -47,6 +48,7 @@ def load_model_from_config(cfg, ckpt, verbose=False, not_use_ckpt=False):
     return model
 
 def load_model_ckpt(model, ckpt, verbose=True):
+    # only load the ckpt into the built model
     map_location = "cpu" if not torch.cuda.is_available() else "cuda"
     print("checkpoint map location:", map_location)
     if ckpt.endswith("model_states.pt"):
