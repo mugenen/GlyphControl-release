@@ -75,7 +75,7 @@ conda activate GlyphControl
 pip install -r requirements.txt
 ```
 
-Althoguh you could run our codes on CPU device,  we recommend you to use CUDA device for faster inference. The recommended CUDA version is **CUDA 11.3** and the minimum GPU memory consumption is 8~10G.
+Although you could run our codes on CPU device,  we recommend you to use CUDA device for faster inference. The recommended CUDA version is **CUDA 11.3** and the minimum GPU memory consumption is 8~10G.
 
 
 ## :unlock: Available Checkpoints
