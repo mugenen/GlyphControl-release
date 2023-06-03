@@ -15,7 +15,7 @@ import time
 from PIL import Image
 from cldm.hack import disable_verbosity, enable_sliced_attention
 # from pytorch_lightning import seed_everything
-
+# from example_list import examples
 def process_multi_wrapper(rendered_txt_0, rendered_txt_1, rendered_txt_2, rendered_txt_3,
                             shared_prompt,  
                             width_0, width_1, width_2, width_3,  
@@ -112,6 +112,12 @@ def load_ckpt(model_ckpt = "LAION-Glyph-10M-Epoch-5"):
     allow_run_generation = False
     return output_str, None, allow_run_generation
 
+def export_parameters(*args):
+    return str(args)
+
+def import_parameters(parameters):
+    return eval(parameters)
+
 SAVE_MEMORY = False
 disable_verbosity()
 if SAVE_MEMORY:
@@ -123,7 +129,11 @@ render_tool = Render_Text(model, save_memory = SAVE_MEMORY)
 
 description = """
 ## Control Stable Diffusion with Glyph Images
+Github link: [Link](https://github.com/AIGText/GlyphControl-release).
+Report: [link](https://arxiv.org/pdf/2305.18259.pdf).\n
+(By using the "Parameter Summary" part, you can import or export the parameter settings of generated images in an easier way.)
 """
+# You could try the listed examples at the bottom by clicking on them and modify the parameters for your own creation. We will update the examples progressively.\n
 
 SPACE_ID = os.getenv('SPACE_ID')
 if SPACE_ID is not None:
@@ -188,13 +198,55 @@ with block:
                     shared_a_prompt = gr.Textbox(label="Added Prompt", value='4K, dslr, best quality, extremely detailed')  
                     shared_n_prompt = gr.Textbox(label="Negative Prompt",  
                                             value='longbody, lowres, bad anatomy, bad hands, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality') 
-        
+        with gr.Accordion("Parameter Summary", open=False):
+            with gr.Row():
+                parameters = gr.Text(label = "Parameters")   
+            with gr.Row():  
+                import_button = gr.Button(value="Import") 
+                export_button = gr.Button(value="Export")     
         with gr.Accordion("Output", open=True):
             with gr.Row(): 
                 message = gr.Text(interactive=False, label = "Message")
             with gr.Row():
-                result_gallery = gr.Gallery(label='Images', show_label=False, elem_id="gallery").style(grid=2, height='auto')  
+                result_gallery = gr.Gallery(label='Images', show_label=False, elem_id="gallery").style(grid=2, height='auto')    
+        
+        # gr.Examples(
+        #         examples= examples,
+        #         inputs=[ model_ckpt, shared_prompt, 
+        #                 rendered_txt_0, width_0, ratio_0, top_left_x_0, top_left_y_0, yaw_0, num_rows_0, 
+        #                 rendered_txt_1, width_1, ratio_1, top_left_x_1, top_left_y_1, yaw_1, num_rows_1, 
+        #                 rendered_txt_2, width_2, ratio_2, top_left_x_2, top_left_y_2, yaw_2, num_rows_2, 
+        #                 rendered_txt_3, width_3, ratio_3, top_left_x_3, top_left_y_3, yaw_3, num_rows_3, 
+        #                 shared_num_samples, shared_image_resolution,  
+        #                 shared_ddim_steps, shared_guess_mode,  
+        #                 shared_strength, shared_scale, shared_seed,  
+        #                 shared_eta, shared_a_prompt, shared_n_prompt],
+        #     )
+    export_button.click(fn=export_parameters, 
+                        inputs = [model_ckpt, shared_prompt, 
+                                            rendered_txt_0, width_0, ratio_0, top_left_x_0, top_left_y_0, yaw_0, num_rows_0, 
+                                            rendered_txt_1, width_1, ratio_1, top_left_x_1, top_left_y_1, yaw_1, num_rows_1, 
+                                            rendered_txt_2, width_2, ratio_2, top_left_x_2, top_left_y_2, yaw_2, num_rows_2, 
+                                            rendered_txt_3, width_3, ratio_3, top_left_x_3, top_left_y_3, yaw_3, num_rows_3, 
+                                            shared_num_samples, shared_image_resolution,  
+                                            shared_ddim_steps, shared_guess_mode,  
+                                            shared_strength, shared_scale, shared_seed,  
+                                            shared_eta, shared_a_prompt, shared_n_prompt],
+                        outputs = [parameters] )
     
+    import_button.click(fn=import_parameters, 
+                    inputs = [parameters],
+                    outputs = [model_ckpt, shared_prompt, 
+                                        rendered_txt_0, width_0, ratio_0, top_left_x_0, top_left_y_0, yaw_0, num_rows_0, 
+                                        rendered_txt_1, width_1, ratio_1, top_left_x_1, top_left_y_1, yaw_1, num_rows_1, 
+                                        rendered_txt_2, width_2, ratio_2, top_left_x_2, top_left_y_2, yaw_2, num_rows_2, 
+                                        rendered_txt_3, width_3, ratio_3, top_left_x_3, top_left_y_3, yaw_3, num_rows_3, 
+                                        shared_num_samples, shared_image_resolution,  
+                                        shared_ddim_steps, shared_guess_mode,  
+                                        shared_strength, shared_scale, shared_seed,  
+                                        shared_eta, shared_a_prompt, shared_n_prompt]
+                     )
+
     run_button.click(fn=process_multi_wrapper,  
                 inputs=[rendered_txt_0, rendered_txt_1, rendered_txt_2, rendered_txt_3,
                         shared_prompt,  
